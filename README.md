@@ -1,5 +1,5 @@
 # plantspy
-Lepton 2.5 Radiometric Sensor with OpenCV HUD Temperature Hot Spot Detection with Averaging F/C
+Lepton 2.5 Radiometric Sensor with OpenCV HUD Temperature Hot Spot Detection with Averaging Temp
 
 Example output from http://127.0.0.1:80/
 
