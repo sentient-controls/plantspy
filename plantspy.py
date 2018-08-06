@@ -128,7 +128,7 @@ def capture(flip_v=False, device="/dev/spidev0.1"):
         data, _ = l.capture()
 
     minVal, maxVal, _, _ = cv2.minMaxLoc(data)
-    resized_data = cv2.resize(data[:,:], (1280, 960))
+    resized_data = cv2.resize(data[:,:], (800, 480))
     _, _, minLoc, maxLoc = cv2.minMaxLoc(resized_data)
 
     # Detect leaf
