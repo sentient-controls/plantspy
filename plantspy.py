@@ -190,13 +190,13 @@ def display_datetime(img, color):
     dt = datetime.datetime.fromtimestamp(time.time()).strftime(
         '%Y-%m-%d %H:%M:%S'
     )
-    cv2.putText(img, dt, (50,5), cv2.FONT_HERSHEY_PLAIN, 1.5, color, 2)
+    cv2.putText(img, dt, (10,25), cv2.FONT_HERSHEY_PLAIN, 1.5, color, 4)
 
 def display_temperature(img, val_k, loc, color):
     val_f = ktof(val_k)
     val_c = ktoc(val_k)
     x, y = loc
-    cv2.putText(img,"{0:.2f}F ({1:.2f}C)".format(val_f, val_c), (50,50),
+    cv2.putText(img,"{0:.2f}F ({1:.2f}C)".format(val_f, val_c), (10,50),
                 cv2.FONT_HERSHEY_PLAIN, 1.5, color, 4)
     cv2.line(img, (x - 40, y), (x + 40, y), color, 2)
     cv2.line(img, (x, y - 40), (x, y + 40), color, 2)
@@ -212,7 +212,7 @@ def display_avg_temp(data, img, color):
     temp_f = ktof(mean)
     cv2.putText(img,
                 "Avg: {0:.2f}F ({1:.2f}C)".format(temp_f, temp_c),
-                (50,100),
+                (10,75),
                 cv2.FONT_HERSHEY_PLAIN, 1.5, color, 4)
 
 
@@ -221,8 +221,10 @@ def raw_to_8bit(data):
     np.right_shift(data, 8, data)
     return cv2.cvtColor(np.uint8(data), cv2.COLOR_GRAY2RGB)
 
+
 def ktof(val):
     return ((val / 100) * 1.8) - 459.67
+
 
 def ktoc(val):
     return  (val / 100.00) - 273.15
@@ -236,6 +238,8 @@ def setup_logging():
     consoleHandler.setFormatter(logFormatter)
     rootLogger.addHandler(consoleHandler)
     rootLogger.setLevel(logging.DEBUG)
+
+
 # MAIN
 def main():
     setup_logging()
