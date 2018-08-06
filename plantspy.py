@@ -5,6 +5,8 @@ import numpy
 import logging
 import numpy as np
 import imutils
+import datetime
+import time
 from os import uname
 from PIL import Image
 from pylepton import Lepton
@@ -96,6 +98,9 @@ class IRCamHandler(BaseHTTPRequestHandler):
                 # Convert to RGB
                 rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2RGB)
 
+                # Display Datetime
+                display_datetime(rgb_img, hud_color)
+
                 # Display temperature to image
                 display_temperature(rgb_img, maxVal, maxLoc, hud_color)
 
@@ -111,7 +116,6 @@ class IRCamHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-length', str(tmpFile.len))
                 self.end_headers()
                 jpg.save(self.wfile, 'JPEG')
-                print("GOT HERE 1")
 
             except Exception as e:
                 print(e)
@@ -124,7 +128,7 @@ def capture(flip_v=False, device="/dev/spidev0.1"):
         data, _ = l.capture()
 
     minVal, maxVal, _, _ = cv2.minMaxLoc(data)
-    resized_data = cv2.resize(data[:,:], (720, 480))
+    resized_data = cv2.resize(data[:,:], (1280, 960))
     _, _, minLoc, maxLoc = cv2.minMaxLoc(resized_data)
 
     # Detect leaf
@@ -147,7 +151,10 @@ def detect_leaf(image):
     # loop over the contours
     for c in cnts:
         cv2.drawContours(image, [c], -1, (0, 255, 0), 1)
-    cv2.imwrite('/tmp/ir_contour.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+    cv2.imwrite(
+        '/tmp/ir_contour.jpg',
+        image, [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+    )
     return image
 
 def store_value(conn, name, value):
@@ -179,6 +186,11 @@ def write_influx(pos_x, pos_y, temp):
     store_value(conn,"sentient.{0}.temperature_f.01".format(hostname),
                 temp)
 
+def display_datetime(img, color):
+    dt = datetime.datetime.fromtimestamp(time.time()).strftime(
+        '%Y-%m-%d %H:%M:%S'
+    )
+    cv2.putText(img, dt, (50,5), cv2.FONT_HERSHEY_PLAIN, 1.5, color, 2)
 
 def display_temperature(img, val_k, loc, color):
     val_f = ktof(val_k)
