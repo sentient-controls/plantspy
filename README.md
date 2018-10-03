@@ -19,9 +19,9 @@ in return allow for optimal fruiting [1].
 
 
 ## Updates
-###2018-08-11
-Imaging recognition is not quite complete, however we have started adding in
-functions to start detecting leaves based on example input images that will
+### 2018-08-11
+Image recognition has not been completed yet. We have, however, started adding
+functions to detect leaves based on example input images that will
 allow us to compare and match to. Updates forthcoming on this enhancement.
 
 ## Requirements and Installation 
