@@ -15,6 +15,9 @@ from influxdb import InfluxDBClient
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
+# import the necessary packages
+from picamera.array import PiRGBArray
+from picamera import PiCamera
 
 LEP_WIDTH = 80
 LEP_HEIGHT = 60
@@ -86,7 +89,8 @@ class IRCamHandler(BaseHTTPRequestHandler):
         while True:
             try:
                 try:
-                    (data, image, minVal, maxVal, minLoc, maxLoc) = capture()
+                    (data, image, minVal, maxVal, minLoc, maxLoc) = capture_ir()
+                    camera_img = capture()
                 except Exception as e:
                     print(e)
                     print(format_exc())
@@ -95,8 +99,11 @@ class IRCamHandler(BaseHTTPRequestHandler):
                 # Apply the color map (heatmap)
                 rgb_img = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
 
+                rgb_img = transparentOverlay(camera_img, rgb_img)
+
                 # Convert to RGB
                 rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2RGB)
+
 
                 # Display Datetime
                 display_datetime(rgb_img, hud_color)
@@ -122,8 +129,31 @@ class IRCamHandler(BaseHTTPRequestHandler):
                 print(format_exc())
                 break
 
+def transparentOverlay(src , overlay , pos=(0,0),scale = 1):
+    """
+    :param src: Input Color Background Image
+    :param overlay: transparent Image (BGRA)
+    :param pos:  position where the image to be blit.
+    :param scale : scale factor of transparent image.
+    :return: Resultant Image
+    """
+    overlay = cv2.resize(overlay,(0,0),fx=scale,fy=scale)
+    h,w,_ = overlay.shape  # Size of foreground
+    rows,cols,_ = src.shape  # Size of background Image
+    y,x = pos[0],pos[1]    # Position of foreground/overlay image
 
-def capture(flip_v=False, device="/dev/spidev0.1"):
+    #loop over all pixels and apply the blending equation
+    for i in range(h):
+        for j in range(w):
+            if x+i >= rows or y+j >= cols:
+                continue
+            alpha = float(overlay[i][j][3]/255.0) # read the alpha channel
+            src[x+i][y+j] = alpha*overlay[i][j][:3]+(1-alpha)*src[x+i][y+j]
+    return src
+
+
+
+def capture_ir(flip_v=False, device="/dev/spidev0.1"):
     with Lepton(device) as l:
         data, _ = l.capture()
 
@@ -137,6 +167,12 @@ def capture(flip_v=False, device="/dev/spidev0.1"):
     image = raw_to_8bit(resized_data)
 
     return (data, image, minVal, maxVal, minLoc, maxLoc)
+
+def capture():
+    camera = PiCamera()
+    rawCapture = PiRGBArray(camera)
+    camera.capture(rawCapture, format="bgr")
+    return rawCapture.array
 
 def detect_leaf(image):
     # load the image and resize it to a smaller factor so that
