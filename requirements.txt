@@ -1,0 +1,5 @@
+pylepton>=0.1.2
+Pillow>=5.3.0
+Pillow-PIL>=0.1.dev0
+influxdb>=5.0.0
+picamera>=1.13
